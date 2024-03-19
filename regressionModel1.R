@@ -44,6 +44,8 @@ getLinearModel1<-function(){
   beta[10]=1.5
   m$beta=beta
   
+  m$oracle="y~x4+x5+x6+x7+x8+x9+x10"
+  
   scenario=list()
   scenario[[1]]=list(n=100, errVariance=6.25)
   scenario[[2]]=list(n=100, errVariance=2.50)
@@ -54,6 +56,29 @@ getLinearModel1<-function(){
   
   m$getSampleCovariates<-function(m,n){
     return(rmvnorm(n,sigma=m$sigma))
+  }
+  
+  m$getSample<-function(m,n, errVariance){
+    x=m$getSampleCovariates(m,n)
+    y=x %*% m$beta
+    y=y[,1]
+    err=rnorm(n,0,sqrt(errVariance))
+    y=y+err
+    x=as.data.frame(x)
+    colnames(x)=paste0("x",c(1:m$nOfCovariates))
+    x$y=y
+    return(x)
+  }
+  
+  m$getSampleScenario<-function(m,scenarioNr, nSample){
+    errVariance=m$scenario[[scenarioNr]]$errVariance
+    n=m$scenario[[scenarioNr]]$n
+    
+    res=list()
+    for (i in c(1:nSample)){
+      res[[i]]=m$getSample(m,n,errVariance)
+    }
+    return(res)
   }
   
   return(m)

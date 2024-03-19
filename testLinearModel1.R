@@ -1,6 +1,18 @@
+source("regressionModel1.R")
+
 mod1=getLinearModel1()
 x=mod1$getSampleCovariates(mod1,100000)
 covMat=cov(x)
 
 covMat[1,5] # 0.7
-covMat[5,1] # 0.7
+covMat[1,10] # 0.5
+covMat[2, 6]
+covMat[4,8]
+covMat[7,8]
+covMat[7,14]
+covMat[9,13]
+covMat[11,12]
+
+df=mod1$getSample(mod1,10000,3)
+sc=mod1$getSampleScenario(mod1,1,10000)
+
