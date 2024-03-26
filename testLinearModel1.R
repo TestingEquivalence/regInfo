@@ -16,3 +16,14 @@ covMat[11,12]
 df=mod1$getSample(mod1,10000,3)
 sc=mod1$getSampleScenario(mod1,1,10000)
 
+v=mod1$beta
+bv=(v!=0)
+
+rv=bv
+rv[4]=FALSE
+rv[5]=FALSE
+rv[1]=TRUE
+
+nCorrect=sum(rv & bv)
+nFalsePositive=sum(!bv & rv)
+sum(rv)  
