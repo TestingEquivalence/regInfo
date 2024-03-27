@@ -1,5 +1,6 @@
 source("regressionModel1.R")
 source("simulation.R")
+source("stepwiseSelection.R")
 
 scenarioNr=1
 regMod1=getLinearModel1()
@@ -20,7 +21,7 @@ calibrate<-function(df){
 }
 
 getCoef<-function(m){
-  return(c(0,m))
+  return(m)
 }
 
 predict<-function(m, outOfSample){
@@ -30,7 +31,7 @@ predict<-function(m, outOfSample){
 }
 
 res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
-cres=evaluateCoef(res$coef,c(0, regMod1$beta))
+cres=evaluateCoef(res$coef,regMod1$beta)
 
 # full model
 
@@ -39,7 +40,9 @@ calibrate<-function(df){
   return(m)
 }
 getCoef<-function(m){
-  return(coef(m))
+  v=coef(m)
+  v=v[-1]
+  return(v)
 }
 predict<-function(m, outOfSample){
   y=predict.lm(m,outOfSample)
@@ -47,6 +50,7 @@ predict<-function(m, outOfSample){
 }
 
 res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
+cres=evaluateCoef(res$coef,regMod1$beta)
 
 # oracle model where all non zero variables are selected
 
@@ -54,19 +58,25 @@ calibrate<-function(df){
   m=lm(regMod1$oracle,df)
   return(m)
 }
+getCoef<-function(m){
+  return(regMod1$beta)
+}
 predict<-function(m, outOfSample){
   y=predict.lm(m,outOfSample)
   return(y)
 }
 
-resultMSE$oracleSelected=simulate(calibrate,predict,inSampleSet,outOfSample, outOfSampleResponce)
-
+res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
+cres=evaluateCoef(res$coef,regMod1$beta)
 
 
 # stepwise selection with AIC
 # try all three variants "both", "backward", "forward"
 
-
+calibrate<-function(df){
+  m=step.calibrate(df,"backward")
+  return(m)
+}
 
 predict<-function(m, outOfSample){
   y=predict.lm(m,outOfSample)

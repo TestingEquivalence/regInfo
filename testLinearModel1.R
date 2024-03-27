@@ -27,3 +27,7 @@ rv[1]=TRUE
 nCorrect=sum(rv & bv)
 nFalsePositive=sum(!bv & rv)
 sum(rv)  
+
+df=inSampleSet[[1]]
+m=calibrate(df)
+step.getCoef(m)
