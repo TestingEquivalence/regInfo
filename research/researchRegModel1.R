@@ -78,10 +78,35 @@ calibrate<-function(df){
   return(m)
 }
 
+getCoef<-function(m){
+  v=step.getCoef(m)
+}
+
 predict<-function(m, outOfSample){
   y=predict.lm(m,outOfSample)
   return(y)
 }
 
-resultMSE$beAIC=simulate(calibrate,predict,inSampleSet,outOfSample, outOfSampleResponce)
-resultMSE=as.data.frame(resultMSE)
+res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
+cres=evaluateCoef(res$coef,regMod1$beta)
+
+# stepwise selection with Mallows Cp
+# Search methods available are: "exhaustive","backward", "forward", "seqrep"
+
+calibrate<-function(df){
+  method="forward"
+  m=regsubset.calibrate(df,method)
+  return(m)
+}
+
+getCoef<-function(m){
+  v=regsubset.getCoef(m)
+}
+
+predict<-function(m, outOfSample){
+  y=predict.lm(m,outOfSample)
+  return(y)
+}
+
+res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
+cres=evaluateCoef(res$coef,regMod1$beta)
