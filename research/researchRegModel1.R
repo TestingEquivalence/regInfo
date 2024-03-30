@@ -110,3 +110,23 @@ predict<-function(m, outOfSample){
 
 res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
 cres=evaluateCoef(res$coef,regMod1$beta)
+
+# LARS using cross validation to find optimal parameter lambda 
+
+calibrate<-function(df){
+  m=LARS.calibrate(df,5)
+  return(m)
+}
+
+getCoef<-function(m){
+  v=LARS.getCoef(m)
+}
+
+predict<-function(m, outOfSample){
+  y=LARS.predict(m,outOfSample)
+  return(y)
+}
+
+res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
+cres=evaluateCoef(res$coef,regMod1$beta)
+

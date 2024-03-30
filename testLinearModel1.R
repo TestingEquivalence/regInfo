@@ -29,5 +29,13 @@ nFalsePositive=sum(!bv & rv)
 sum(rv)  
 
 df=inSampleSet[[1]]
-m=calibrate(df)
-step.getCoef(m)
+x=df
+x$y=NULL
+x=as.matrix(x)
+y=df$y
+fit = glmnet(x, y, alpha = 1)
+
+# perform cross-validation
+cvfit = cv.glmnet(x, y, nfolds=10,alpha = 1)
+bestLambda = cvfit$lambda.min
+finalCoef = predict.glmnet(m, s = m$bestLambda, type = "coefficients")
