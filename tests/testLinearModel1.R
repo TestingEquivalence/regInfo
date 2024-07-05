@@ -39,3 +39,7 @@ fit = glmnet(x, y, alpha = 1)
 cvfit = cv.glmnet(x, y, nfolds=10,alpha = 1)
 bestLambda = cvfit$lambda.min
 finalCoef = predict.glmnet(m, s = m$bestLambda, type = "coefficients")
+
+# test knockoff
+df=inSampleSet[[1]]
+m=knockoff.calibrate(df, fdr=0.2)

@@ -1,12 +1,12 @@
 library(glmnet)
 
-LARS.calibrate<-function(df, nfolds){
+LASSO.calibrate<-function(df, nfolds){
   x=df
   x$y=NULL
   x=as.matrix(x)
   y=df$y
   
-  # fit LARS model
+  # fit LASSO model
   # alpha=1 is the lasso penalty
   fit = glmnet(x, y, alpha = 1)
   
@@ -20,7 +20,7 @@ LARS.calibrate<-function(df, nfolds){
   return(fit)
 }
 
-LARS.getCoef<-function(m){
+LASSO.getCoef<-function(m){
   
   # Get coefficients corresponding to the best lambda
   finalCoef = predict.glmnet(m, s = m$bestLambda, type = "coefficients")
@@ -34,7 +34,7 @@ LARS.getCoef<-function(m){
 }
 
 
-LARS.predict<-function(m, outOfSample){
+LASSO.predict<-function(m, outOfSample){
   res =predict.glmnet(m, s = m$bestLambda, newx = as.matrix(outOfSample))
   res=as.vector(res)
   return(res)
