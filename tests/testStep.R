@@ -10,6 +10,10 @@ set.seed(10071977)
 inSampleSet=regMod1$getSampleScenario(regMod1,scenarioNr,nSample)
 df=inSampleSet[[1]]
 
-# try all three variants "exhaustive","backward", "forward", "seqrep"
+# direction can be "backward", "forward"
 
-m=step.calibrate(df=df, direction="backQward")
+direction="both"
+
+m=lm("y~.",df)
+finalm = step(m, direction=direction, k = 2, trace=0)
+finalm$df=df
