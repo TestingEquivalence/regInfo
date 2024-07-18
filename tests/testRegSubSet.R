@@ -1,3 +1,5 @@
+library(leaps)
+
 source("regressionModel1.R")
 source("simulation.R")
 source("stepwiseSelection.R")
@@ -11,7 +13,7 @@ inSampleSet=regMod1$getSampleScenario(regMod1,scenarioNr,nSample)
 df=inSampleSet[[1]]
 
 # try all three variants "exhaustive","backward", "forward", "seqrep"
-method="seqrep"
+method="backward"
 selector="cp" # "cp", "bic"
 
 nvmax=ncol(df)-1

@@ -1,6 +1,5 @@
 source("regressionModel1.R")
 source("simulation.R")
-source("stepwiseSelection.R")
 
 scenarioNr=1
 regMod1=getLinearModel1()
@@ -74,38 +73,15 @@ res$mse
 write.csv(res$mse,file="mse.csv")
 write.csv(cres, file="coef.csv")
 
-
-# stepwise selection with AIC
-# try all three variants "exhaustive","backward", "forward", "seqrep"
-source("stepwiseSelection.R")
-
-calibrate<-function(df){
-  m=step.calibrate(df, direction="backward")
-  return(m)
-}
-
-getCoef<-function(m){
-  v=step.getCoef(m)
-}
-
-predict<-function(m, outOfSample){
-  y=predict.lm(m,outOfSample)
-  return(y)
-}
-
-res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
-cres=evaluateCoef(res$coef,regMod1$beta)
-
-write.csv(res$mse,file="mse.csv")
-write.csv(cres, file="coef.csv")
-
-# stepwise selection with Mallows Cp
-# Search methods available are: "exhaustive","backward", "forward", "seqrep"
-source("stepwiseSelection.R")
+# stepwise selection with Mallows Cp and Bic
+# Search methods available are: "backward", "forward", "exhaustive", "seqrep"
+# Selector can be "cp" or "bic"
+source("regsubsetSel.R")
 
 calibrate<-function(df){
-  method="forward"
-  m=regsubset.calibrate(df,method)
+  method="seqrep"
+  selector="cp"
+  m=regsubset.calibrate(df,method, selector)
   return(m)
 }
 
@@ -120,6 +96,11 @@ predict<-function(m, outOfSample){
 
 res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
 cres=evaluateCoef(res$coef,regMod1$beta)
+
+
+write.csv(res$mse,file="mse.csv")
+write.csv(cres, file="coef.csv")
+
 
 # LASSO using cross validation to find optimal parameter lambda 
 source("LASSO.R")

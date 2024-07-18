@@ -6,7 +6,7 @@ simulate<-function(calibrate, predict, getCoef,inSampleSet,outOfSample, outOfSam
   for(df in inSampleSet){
     m=calibrate(df)
     vcoef[[i]]=getCoef(m)
-    
+
     predicted=predict(m, outOfSample)
     mse=mean((outOfSampleResponce - predicted)^2)
     vmse=c(vmse,mse)

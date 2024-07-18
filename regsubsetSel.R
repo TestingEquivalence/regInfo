@@ -1,12 +1,22 @@
 # different methods of search are available: 
 # try all three variants "exhaustive","backward", "forward", "seqrep"
+library(leaps)
 
-regsubset.calibrate<-function(df, method){
+regsubset.calibrate<-function(df, method, selector){
   nvmax=ncol(df)-1
   regFit=regsubsets(y ~ ., data = df, nvmax=nvmax, method = method)
   regFitSum=summary(regFit)
+  
   minCpIndex=which.min(regFitSum$cp)
-  selectedCoefs = regFitSum$which[minCpIndex,]
+  minBICIndex=which.min(regFitSum$bic)
+  
+  if (selector=="cp"){
+    ind=minCpIndex
+  } else if (selector=="bic") {
+    ind=minBICIndex
+  }
+  
+  selectedCoefs = regFitSum$which[ind,]
   selectedCoefs=selectedCoefs[-1]
   allCoef=as.numeric(selectedCoefs)
   selectedPredictors=names(selectedCoefs[selectedCoefs==TRUE])
