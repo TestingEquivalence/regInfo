@@ -8,12 +8,15 @@ regsubset.calibrate<-function(df, method, selector){
   regFitSum=summary(regFit)
   
   minCpIndex=which.min(regFitSum$cp)
-  minBICIndex=which.min(regFitSum$bic)
+  minBICIndex=which.min(regFitSum$bic) 
+  minAdjR2Index=which.max(regFitSum$adjr2)
   
   if (selector=="cp"){
     ind=minCpIndex
   } else if (selector=="bic") {
     ind=minBICIndex
+  } else if (selector=="adjR2"){
+    ind=minAdjR2Index
   }
   
   selectedCoefs = regFitSum$which[ind,]
