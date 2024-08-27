@@ -75,12 +75,12 @@ write.csv(cres, file="coef.csv")
 
 # stepwise selection with Mallows Cp and Bic
 # Search methods available are: "backward", "forward", "exhaustive", "seqrep"
-# Selector can be "cp" or "bic"
+# Selector can be "cp", "bic" or "adjR2"
 source("regsubsetSel.R")
 
 calibrate<-function(df){
   method="seqrep"
-  selector="cp"
+  selector="adjR2"
   m=regsubset.calibrate(df,method, selector)
   return(m)
 }
@@ -107,7 +107,7 @@ source("LASSO.R")
 
 # try different values of cross validation: 5, 10 and 20
 calibrate<-function(df){
-  m=LASSO.calibrate(df,5)
+  m=LASSO.calibrate(df,20)
   return(m)
 }
 
@@ -123,5 +123,29 @@ predict<-function(m, outOfSample){
 res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
 cres=evaluateCoef(res$coef,regMod1$beta)
 
+write.csv(res$mse,file="mse.csv")
+write.csv(cres, file="coef.csv")
+
 # use knockoff to select relevant covariates
 source("knockoff.R")
+
+# try different values of fdr 1%, 5%, 10%, 20%, 50%
+# try different statistic: originalKnockoffStat oder Default statistic
+calibrate<-function(df){
+  m=knockoff.calibrate(df,fdr, statistic = originalKnockoffStat)
+  return(m)
+}
+
+getCoef<-function(m){
+  v=coef(m)
+  v=v[-1]
+  return(v)
+}
+
+predict=predict.lm
+
+res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
+cres=evaluateCoef(res$coef,regMod1$beta)
+
+write.csv(res$mse,file="mse.csv")
+write.csv(cres, file="coef.csv")
