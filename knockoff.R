@@ -14,18 +14,17 @@ knockoff.calibrate<-function(df, fdr, statistic=stat.glmnet_coefdiff){
   X=df
   X$y=NULL
   y=df$y
+
+  result = knockoff.filter(X, y, fdr = fdr, statistic = statistic)
   
-  repeat{
-    result = knockoff.filter(X, y, fdr = fdr, statistic = statistic)
-    if (length(result$selected)>0) {
-      break
-    }
+  if (length(result$selected)>0) {
+      selectedPredictors=names(result$selected)
+      frm= paste0("y~",paste(selectedPredictors, collapse = " + "))
+  } else{
+     frm="y~1" 
   }
-  
-  selectedPredictors=names(result$selected)
-  frm= paste0("y~",paste(selectedPredictors, collapse = " + "))
+
   m=lm(frm,df)
-  
   return(m)
 }
 
