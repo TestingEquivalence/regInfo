@@ -132,16 +132,13 @@ source("knockoff.R")
 # try different values of fdr 1%, 5%, 10%, 20%, 50%
 # try different statistic: originalKnockoffStat oder Default statistic
 calibrate<-function(df){
-  m=knockoff.calibrate(df,fdr=0.50)
+  m=knockoff.calibrate(df,fdr=0.20, statistic = originalKnockoffStat)
   return(m)
 }
 
-# unfortunately wrong
-# getCoef<-function(m){
-#   v=coef(m)
-#   v=v[-1]
-#   return(v)
-# }
+getCoef<-function(m){
+ return(m$allCoef)
+}
 
 predict=predict.lm
 

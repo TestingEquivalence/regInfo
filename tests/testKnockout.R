@@ -13,6 +13,11 @@ set.seed(10071977)
 inSampleSet=regMod1$getSampleScenario(regMod1,scenarioNr,nSample)
 df=inSampleSet[[1]]
 
+set.seed(18032024)
+outOfSample=regMod1$getSample(regMod1,sizeOOS,regMod1$scenario[[scenarioNr]]$errVariance)
+outOfSampleResponce=outOfSample$y
+outOfSample$y=NULL
+
 originalKnockoffStat = function(X, X_k, y) {
   abs(t(X) %*% y) - abs(t(X_k) %*% y)
 }
@@ -34,16 +39,26 @@ if (length(result$selected)>0) {
 } else
 {
   frm="y~1" 
+  selectedPredictors=c()
 }
 
+frm
 m=lm(frm,df)
 summary(m)
 
+predicted=predict(m, outOfSample)
+mse=mean((outOfSampleResponce - predicted)^2)
+mse
 
-coef=result$statistic
-coef[coef<=0]=0
-coef[coef>0]=1
 
+allCoef=colnames(outOfSample)
+
+
+# Generate a vector of 1s and 0s
+allCoef01= ifelse(allCoef %in% selectedPredictors, 1, 0)
+allCoef
+selectedPredictors
+allCoef01
 
 
 

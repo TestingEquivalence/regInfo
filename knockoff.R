@@ -22,9 +22,20 @@ knockoff.calibrate<-function(df, fdr, statistic=stat.glmnet_coefdiff){
       frm= paste0("y~",paste(selectedPredictors, collapse = " + "))
   } else{
      frm="y~1" 
+     selectedPredictors=c()
   }
-
+  
   m=lm(frm,df)
+  
+  # selected coef
+  df$y=NULL
+  allCoef=colnames(df)
+  allCoef01= ifelse(allCoef %in% selectedPredictors, 1, 0)
+  # allCoef
+  # selectedPredictors
+  # allCoef01
+  m$allCoef=allCoef01
+  
   return(m)
 }
 
