@@ -1,7 +1,7 @@
 source("models/regressionModel2.R")
 source("simulation.R")
 
-nSample=1 #10000
+nSample=10000
 sizeOOS=100000
 
 # generate models randomly
