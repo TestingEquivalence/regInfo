@@ -38,17 +38,24 @@ evaluateCoef<-function(vCoef, trueCoef){
 }
 
 simulate2<-function(calibrate, predict, getCoef, models,
-                    getInSample,getOutOfSample, outOfSampleResponce){
+                    getInSample,getOutOfSample){
   vmse=c()
   vcoef=list()
   
   i=1
-  for(df in inSampleSet){
-    m=calibrate(df)
+  for(mod in models){
+    # Set a unique seed in each iteration
+    seed_value <- 10071977 + i * 1e6
+    set.seed(seed_value)
+    inSample=getInSample(mod)
+    outOfSample=getOutOfSample(mod)
+    
+    m=calibrate(inSample)
     vcoef[[i]]=getCoef(m)
     
-    predicted=predict(m, outOfSample)
-    mse=mean((outOfSampleResponce - predicted)^2)
+    predicted=predict(m, outOfSample$x)
+    responce=outOfSample$y
+    mse=mean((responce - predicted)^2)
     vmse=c(vmse,mse)
     i=i+1
   }
@@ -58,16 +65,4 @@ simulate2<-function(calibrate, predict, getCoef, models,
   res$mse=vmse
   
   return(res)
-  
-  # for (i in 1:10) {
-  #   # Set a unique seed in each iteration
-  #   seed_value <- 1234 + i * 100  # Change this multiplier to space seeds
-  #   set.seed(seed_value)
-  #   
-  #   # Generate random numbers (e.g., 5 random numbers from a normal distribution)
-  #   random_numbers <- rnorm(5)
-  #   
-  #   # Print or use the random numbers
-  #   print(paste("Iteration", i, "with seed", seed_value, "generated:", paste(random_numbers, collapse = ", ")))
-  # }
-}
+}  

@@ -1,39 +1,52 @@
-source("models/regressionModel1.R")
+source("models/regressionModel2.R")
 source("simulation.R")
 
-scenarioNr=1
-regMod1=getLinearModel1()
-nSample=10000
+nSample=1 #10000
 sizeOOS=100000
 
+# generate models randomly
+models=list()
 set.seed(10071977)
-inSampleSet=regMod1$getSampleScenario(regMod1,scenarioNr,nSample)
-set.seed(18032024)
-outOfSample=regMod1$getSample(regMod1,sizeOOS,regMod1$scenario[[scenarioNr]]$errVariance)
-outOfSampleResponce=outOfSample$y
-outOfSample$y=NULL
+for(i in 1:nSample){
+  models[[i]]=linMod2$getCoeff(linMod2$p,linMod2$k,linMod2$A)
+}
 
+# modelling functions
+getInSample<-function(beta){
+  X=linMod2$getIndependentX(linMod2$n,linMod2$p)
+  sample=linMod2$getSample(linMod2$n,linMod2$p,beta,X)
+  sample$beta=beta
+  return(sample)
+}
 
-# # error only, coefficients are known, also full oracle
-# calibrate<-function(df){
-#   return(regMod1$beta)
-# }
-# 
-# getCoef<-function(m){
-#   return(m)
-# }
-# 
-# predict<-function(m, outOfSample){
-#   y=as.matrix(outOfSample) %*% m
-#   y=y[,1]
-#   return(y)
-# }
-# 
-# res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
-# res$mse
-# cres=evaluateCoef(res$coef,regMod1$beta)
-# write.csv(res$mse,file="mse.csv")
-# write.csv(cres, file="coef.csv")
+getOutOfSample<-function(beta){
+  X=linMod2$getIndependentX(sizeOOS,linMod2$p)
+  sample=linMod2$getSample(sizeOOS,linMod2$p,beta,X)
+  return(sample)
+}
+
+# error only, coefficients are known, also full oracle
+calibrate<-function(inSample){
+  return(inSample$beta)
+}
+
+getCoef<-function(m){
+  return(m)
+}
+
+predict<-function(m, outOfSample){
+  y=as.matrix(outOfSample) %*% m
+  y=y[,1]
+  return(y)
+}
+
+res=simulate2(calibrate = calibrate, predict = predict,
+              getCoef = getCoef,models = models,
+              getInSample = getInSample, getOutOfSample =getOutOfSample)
+res$mse
+cres=evaluateCoef(res$coef,regMod1$beta)
+write.csv(res$mse,file="mse.csv")
+write.csv(cres, file="coef.csv")
 
 # full model
 
