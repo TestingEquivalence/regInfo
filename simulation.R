@@ -65,4 +65,22 @@ simulate2<-function(calibrate, predict, getCoef, models,
   res$mse=vmse
   
   return(res)
-}  
+}
+
+evaluateCoef2<-function(vCoef, vTrueCoef){
+  nCorrectNonZero=c()
+  nWrongNonZero=c()
+  
+  i=1
+  for (v in vCoef){
+    bv=(v!=0)
+    trueCoef=vTrueCoef[[i]]
+    boolTrueCoef=(trueCoef!=0)
+    nCorrectNonZero[i]=sum(bv & boolTrueCoef)
+    nWrongNonZero[i]=sum(!boolTrueCoef & bv)
+    i=i+1
+  }
+  
+  res=data.frame(nCorrectNonZero,nWrongNonZero)
+  return(res)
+}

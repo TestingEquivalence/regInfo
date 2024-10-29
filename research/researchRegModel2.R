@@ -1,7 +1,7 @@
 source("models/regressionModel2.R")
 source("simulation.R")
 
-nSample=10000
+nSample=10 #10000
 sizeOOS=100000
 
 # generate models randomly
@@ -12,9 +12,11 @@ for(i in 1:nSample){
 }
 
 # modelling functions
+
 getInSample<-function(beta){
   X=linMod2$getIndependentX(linMod2$n,linMod2$p)
-  sample=linMod2$getSample(linMod2$n,linMod2$p,beta,X)
+  sample=list()
+  sample$sim=linMod2$getSample(linMod2$n,linMod2$p,beta,X)
   sample$beta=beta
   return(sample)
 }
@@ -44,7 +46,7 @@ res=simulate2(calibrate = calibrate, predict = predict,
               getCoef = getCoef,models = models,
               getInSample = getInSample, getOutOfSample =getOutOfSample)
 res$mse
-cres=evaluateCoef(res$coef,regMod1$beta)
+cres=evaluateCoef2(res$coef,models)
 write.csv(res$mse,file="mse.csv")
 write.csv(cres, file="coef.csv")
 
@@ -63,7 +65,7 @@ predict=lm.predict
 
 res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
 res$mse
-cres=evaluateCoef(res$coef,regMod1$beta)
+cres=evaluateCoef2(res$coef,models)
 
 write.csv(res$mse,file="mse.csv")
 write.csv(cres, file="coef.csv")

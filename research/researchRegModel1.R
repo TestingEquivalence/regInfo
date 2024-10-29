@@ -1,7 +1,7 @@
 source("models/regressionModel1.R")
 source("simulation.R")
 
-scenarioNr=1
+scenarioNr=2
 regMod1=getLinearModel1()
 nSample=10000
 sizeOOS=100000
@@ -14,26 +14,26 @@ outOfSampleResponce=outOfSample$y
 outOfSample$y=NULL
 
 
-# # error only, coefficients are known, also full oracle
-# calibrate<-function(df){
-#   return(regMod1$beta)
-# }
-# 
-# getCoef<-function(m){
-#   return(m)
-# }
-# 
-# predict<-function(m, outOfSample){
-#   y=as.matrix(outOfSample) %*% m
-#   y=y[,1]
-#   return(y)
-# }
-# 
-# res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
-# res$mse
-# cres=evaluateCoef(res$coef,regMod1$beta)
-# write.csv(res$mse,file="mse.csv")
-# write.csv(cres, file="coef.csv")
+# error only, coefficients are known, also full oracle
+calibrate<-function(df){
+  return(regMod1$beta)
+}
+
+getCoef<-function(m){
+  return(m)
+}
+
+predict<-function(m, outOfSample){
+  y=as.matrix(outOfSample) %*% m
+  y=y[,1]
+  return(y)
+}
+
+res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
+res$mse
+cres=evaluateCoef(res$coef,regMod1$beta)
+write.csv(res$mse,file="mse.csv")
+write.csv(cres, file="coef.csv")
 
 # full model
 
@@ -46,7 +46,9 @@ getCoef<-function(m){
   v=v[-1]
   return(v)
 }
-predict=lm.predict
+predict<-function(m,outOfSample){
+  return(predict.lm(m,outOfSample))
+}
 
 res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
 res$mse
@@ -64,7 +66,10 @@ calibrate<-function(df){
 getCoef<-function(m){
   return(regMod1$beta)
 }
-predict=lm.predict
+predict<-function(m,outOfSample){
+  return(predict.lm(m,outOfSample))
+}
+
 
 res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
 cres=evaluateCoef(res$coef,regMod1$beta)
@@ -132,7 +137,7 @@ source("knockoff.R")
 # try different values of fdr 1%, 5%, 10%, 20%, 50%
 # try different statistic: originalKnockoffStat oder Default statistic
 calibrate<-function(df){
-  m=knockoff.calibrate(df,fdr=0.50)
+  m=knockoff.calibrate(df,fdr=0.05)
   return(m)
 }
 
