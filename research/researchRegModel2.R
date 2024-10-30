@@ -1,8 +1,8 @@
 source("models/regressionModel2.R")
 source("simulation.R")
 
-nSample=10 #10000
-sizeOOS=100000
+nSample=5 #10000
+sizeOOS=10000 #100000
 
 # generate models randomly
 models=list()
@@ -15,9 +15,7 @@ for(i in 1:nSample){
 
 getInSample<-function(beta){
   X=linMod2$getIndependentX(linMod2$n,linMod2$p)
-  sample=list()
-  sample$sim=linMod2$getSample(linMod2$n,linMod2$p,beta,X)
-  sample$beta=beta
+  sample=linMod2$getSample(linMod2$n,linMod2$p,beta,X)
   return(sample)
 }
 
@@ -28,8 +26,12 @@ getOutOfSample<-function(beta){
 }
 
 # error only, coefficients are known, also full oracle
+getInSample<-function(beta){
+  return(beta)
+}
+
 calibrate<-function(inSample){
-  return(inSample$beta)
+  return(inSample)
 }
 
 getCoef<-function(m){
@@ -37,7 +39,7 @@ getCoef<-function(m){
 }
 
 predict<-function(m, outOfSample){
-  y=as.matrix(outOfSample) %*% m
+  y=as.matrix(outOfSample$x) %*% m
   y=y[,1]
   return(y)
 }
@@ -47,44 +49,38 @@ res=simulate2(calibrate = calibrate, predict = predict,
               getInSample = getInSample, getOutOfSample =getOutOfSample)
 res$mse
 cres=evaluateCoef2(res$coef,models)
+cres$nCorrectNonZero
+cres$nWrongNonZero
 write.csv(res$mse,file="mse.csv")
 write.csv(cres, file="coef.csv")
 
 # full model
 
-calibrate<-function(df){
-  m=lm("y~.",df)
+calibrate<-function(inSample){
+  df=as.data.frame(inSample$x)
+  y=inSample$y
+  m=lm(y~.,df)
   return(m)
 }
+
 getCoef<-function(m){
   v=coef(m)
   v=v[-1]
   return(v)
 }
-predict=lm.predict
 
-res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
+predict<-function(m,outOfSample){
+  df=as.data.frame(outOfSample$x)
+  return(predict.lm(m,df))
+}
+
+res=simulate2(calibrate = calibrate, predict = predict,
+              getCoef = getCoef,models = models,
+              getInSample = getInSample, getOutOfSample =getOutOfSample)
 res$mse
 cres=evaluateCoef2(res$coef,models)
-
-write.csv(res$mse,file="mse.csv")
-write.csv(cres, file="coef.csv")
-
-# oracle model where all non zero variables are selected
-
-calibrate<-function(df){
-  m=lm(regMod1$oracle,df)
-  return(m)
-}
-getCoef<-function(m){
-  return(regMod1$beta)
-}
-predict=lm.predict
-
-res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
-cres=evaluateCoef(res$coef,regMod1$beta)
-res$mse
-
+cres$nCorrectNonZero
+cres$nWrongNonZero
 write.csv(res$mse,file="mse.csv")
 write.csv(cres, file="coef.csv")
 
@@ -93,9 +89,11 @@ write.csv(cres, file="coef.csv")
 # Selector can be "cp", "bic" or "adjR2"
 source("regsubsetSel.R")
 
-calibrate<-function(df){
-  method="seqrep"
-  selector="adjR2"
+calibrate<-function(inSample){
+  method="backward"
+  selector="cp"
+  df=as.data.frame(inSample$x)
+  df$y=inSample$y
   m=regsubset.calibrate(df,method, selector)
   return(m)
 }
@@ -104,18 +102,20 @@ getCoef<-function(m){
   v=regsubset.getCoef(m)
 }
 
-predict<-function(m, outOfSample){
-  y=predict.lm(m,outOfSample)
-  return(y)
+predict<-function(m,outOfSample){
+  df=as.data.frame(outOfSample$x)
+  return(predict.lm(m,df))
 }
 
-res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
-cres=evaluateCoef(res$coef,regMod1$beta)
-
-
+res=simulate2(calibrate = calibrate, predict = predict,
+              getCoef = getCoef,models = models,
+              getInSample = getInSample, getOutOfSample =getOutOfSample)
+res$mse
+cres=evaluateCoef2(res$coef,models)
+cres$nCorrectNonZero
+cres$nWrongNonZero
 write.csv(res$mse,file="mse.csv")
 write.csv(cres, file="coef.csv")
-
 
 # LASSO using cross validation to find optimal parameter lambda 
 source("LASSO.R")

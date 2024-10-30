@@ -53,7 +53,7 @@ simulate2<-function(calibrate, predict, getCoef, models,
     m=calibrate(inSample)
     vcoef[[i]]=getCoef(m)
     
-    predicted=predict(m, outOfSample$x)
+    predicted=predict(m, outOfSample)
     responce=outOfSample$y
     mse=mean((responce - predicted)^2)
     vmse=c(vmse,mse)
