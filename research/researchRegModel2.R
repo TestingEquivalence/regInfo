@@ -121,8 +121,10 @@ write.csv(cres, file="coef.csv")
 source("LASSO.R")
 
 # try different values of cross validation: 5, 10 and 20
-calibrate<-function(df){
-  m=LASSO.calibrate(df,20)
+calibrate<-function(inSample){
+  df=as.data.frame(inSample$x)
+  df$y=inSample$y
+  m=LASSO.calibrate(df,5)
   return(m)
 }
 
@@ -131,13 +133,18 @@ getCoef<-function(m){
 }
 
 predict<-function(m, outOfSample){
-  y=LASSO.predict(m,outOfSample)
+  df=as.data.frame(outOfSample$x)
+  y=LASSO.predict(m,df)
   return(y)
 }
 
-res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
-cres=evaluateCoef(res$coef,regMod1$beta)
-
+res=simulate2(calibrate = calibrate, predict = predict,
+              getCoef = getCoef,models = models,
+              getInSample = getInSample, getOutOfSample =getOutOfSample)
+res$mse
+cres=evaluateCoef2(res$coef,models)
+cres$nCorrectNonZero
+cres$nWrongNonZero
 write.csv(res$mse,file="mse.csv")
 write.csv(cres, file="coef.csv")
 
