@@ -153,20 +153,29 @@ source("knockoff.R")
 
 # try different values of fdr 1%, 5%, 10%, 20%, 50%
 # try different statistic: originalKnockoffStat oder Default statistic
-calibrate<-function(df){
-  m=knockoff.calibrate(df,fdr=0.50)
+calibrate<-function(inSample){
+  df=as.data.frame(inSample$x)
+  df$y=inSample$y
+  m=knockoff.calibrate(df,fdr=0.10, statistic = originalKnockoffStat)
   return(m)
 }
 
 getCoef<-function(m){
- return(m$allCoef)
+  return(m$allCoef)
 }
 
-predict=predict.lm
+predict<-function(m,outOfSample){
+  df=as.data.frame(outOfSample$x)
+  return(predict.lm(m,df))
+}
 
-res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
-cres=evaluateCoef(res$coef,regMod1$beta)
-
+res=simulate2(calibrate = calibrate, predict = predict,
+              getCoef = getCoef,models = models,
+              getInSample = getInSample, getOutOfSample =getOutOfSample)
+res$mse
+cres=evaluateCoef2(res$coef,models)
+cres$nCorrectNonZero
+cres$nWrongNonZero
 write.csv(res$mse,file="mse.csv")
 write.csv(cres, file="coef.csv")
  

@@ -1,7 +1,7 @@
 source("models/regressionModel1.R")
 source("simulation.R")
 
-scenarioNr=2
+scenarioNr=3
 regMod1=getLinearModel1()
 nSample=10000
 sizeOOS=100000
@@ -137,7 +137,7 @@ source("knockoff.R")
 # try different values of fdr 1%, 5%, 10%, 20%, 50%
 # try different statistic: originalKnockoffStat oder Default statistic
 calibrate<-function(df){
-  m=knockoff.calibrate(df,fdr=0.05)
+  m=knockoff.calibrate(df,fdr=0.50)
   return(m)
 }
 
