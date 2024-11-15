@@ -1,6 +1,6 @@
 library(leaps)
 
-source("regressionModel1.R")
+source("models/regressionModel1.R")
 source("simulation.R")
 source("regsubsetSel.R")
 
