@@ -1,7 +1,7 @@
 source("models/regressionModel1.R")
 source("simulation.R")
 
-scenarioNr=3
+scenarioNr=1
 regMod1=getLinearModel1()
 nSample=10000
 sizeOOS=100000
@@ -30,10 +30,10 @@ predict<-function(m, outOfSample){
 }
 
 res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
-res$mse
 cres=evaluateCoef(res$coef,regMod1$beta)
-write.csv(res$mse,file="mse.csv")
-write.csv(cres, file="coef.csv")
+df=data.frame(mse=res$mse, rSquared=res$rSquared, 
+              nCorrectNonZero=cres$nCorrectNonZero, nWrongNonZero=cres$nWrongNonZero)
+write.csv(df, "simRes_knownModel.csv")
 
 # full model
 

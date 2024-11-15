@@ -1,5 +1,6 @@
 simulate<-function(calibrate, predict, getCoef,inSampleSet,outOfSample, outOfSampleResponce){
   vmse=c()
+  vRsquared=c()
   vcoef=list()
   
   i=1
@@ -8,14 +9,25 @@ simulate<-function(calibrate, predict, getCoef,inSampleSet,outOfSample, outOfSam
     vcoef[[i]]=getCoef(m)
 
     predicted=predict(m, outOfSample)
-    mse=mean((outOfSampleResponce - predicted)^2)
+    resid=outOfSampleResponce-predicted
+
+    mse=mean(resid^2)
     vmse=c(vmse,mse)
+
+    SS_res=sum(resid^2)
+    meanY=mean(outOfSampleResponce)
+    cY=outOfSampleResponce-meanY
+    SS_tot=sum(cY^2)
+    Rsquared=1-SS_res/SS_tot
+    vRsquared=c(vRsquared,Rsquared)
+    
     i=i+1
   }
   
   res=list()
   res$coef=vcoef
   res$mse=vmse
+  res$rSquared=vRsquared
   
   return(res)
 }
