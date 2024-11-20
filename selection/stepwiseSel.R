@@ -15,7 +15,7 @@ calibrate_ols_step_backward<-function(df,p_val){
   return(m)
 }
 
-calibrate_ols_step_backward<-function(df,p_val){
+calibrate_ols_step_forward<-function(df,p_val){
   m=lm("y~.",df)
   sm=ols_step_forward_p(m, p_val)
   m=sm$model

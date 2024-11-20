@@ -2,7 +2,7 @@ library(leaps)
 
 source("models/regressionModel1.R")
 source("simulation.R")
-source("regsubsetSel.R")
+source("selection/regsubsetSel.R")
 
 scenarioNr=1
 regMod1=getLinearModel1()

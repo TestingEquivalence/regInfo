@@ -54,8 +54,12 @@ res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleRespo
 res$mse
 cres=evaluateCoef(res$coef,regMod1$beta)
 
-write.csv(res$mse,file="mse.csv")
-write.csv(cres, file="coef.csv")
+res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
+cres=evaluateCoef(res$coef,regMod1$beta)
+df=data.frame(mse=res$mse, rSquared=res$rSquared, 
+              nCorrectNonZero=cres$nCorrectNonZero, nWrongNonZero=cres$nWrongNonZero)
+write.csv(df, "simRes_fullModel.csv")
+
 
 # oracle model where all non zero variables are selected
 
@@ -70,41 +74,47 @@ predict<-function(m,outOfSample){
   return(predict.lm(m,outOfSample))
 }
 
-
 res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
 cres=evaluateCoef(res$coef,regMod1$beta)
-res$mse
+df=data.frame(mse=res$mse, rSquared=res$rSquared, 
+              nCorrectNonZero=cres$nCorrectNonZero, nWrongNonZero=cres$nWrongNonZero)
+write.csv(df, "simRes_oracleSelection.csv")
 
-write.csv(res$mse,file="mse.csv")
-write.csv(cres, file="coef.csv")
 
-# stepwise selection with Mallows Cp and Bic
-# Search methods available are: "backward", "forward", "exhaustive", "seqrep"
-# Selector can be "cp", "bic" or "adjR2"
+# stepwise selection using AIC, Mallows Cp, BIC, adjR2
+# Search methods available are: 
+methods={"backward"; "forward"; "exhaustive"; "seqrep"}
+# Selectorrs for penalty terms are:
+selectors={"cp"; "bic" ; "adjR2"}
 source("regsubsetSel.R")
-
-calibrate<-function(df){
-  method="seqrep"
-  selector="adjR2"
-  m=regsubset.calibrate(df,method, selector)
-  return(m)
-}
 
 getCoef<-function(m){
   v=regsubset.getCoef(m)
 }
+
 
 predict<-function(m, outOfSample){
   y=predict.lm(m,outOfSample)
   return(y)
 }
 
-res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
-cres=evaluateCoef(res$coef,regMod1$beta)
 
+for (method in methods){
+  for (selector in selectors){
+    calibrate<-function(df){
+      m=regsubset.calibrate(df,method, selector)
+      return(m)
+    }
+    
+    res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
+    cres=evaluateCoef(res$coef,regMod1$beta)
+    df=data.frame(mse=res$mse, rSquared=res$rSquared, 
+                  nCorrectNonZero=cres$nCorrectNonZero, nWrongNonZero=cres$nWrongNonZero)
+    write.csv(df, "simRes_oracleSelection.csv")
 
-write.csv(res$mse,file="mse.csv")
-write.csv(cres, file="coef.csv")
+  }
+}
+
 
 
 # LASSO using cross validation to find optimal parameter lambda 

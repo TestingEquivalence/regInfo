@@ -1,8 +1,7 @@
-library(olsrr)
+library(MASS)
 
 source("models/regressionModel1.R")
 source("simulation.R")
-source("selection/stepwiseSel.R")
 
 scenarioNr=1
 regMod1=getLinearModel1()
@@ -19,9 +18,25 @@ outOfSampleResponce=outOfSample$y
 outOfSample$y=NULL
 
 
-# stepwise backward regression
+
+# both, backward, forward 
+direction=c("backward")
+steps=1000
+
+# stepwise AIC
 calibrate<-function(df){
-  m=calibrate_ols_step_forward(df, 0.10)
+  m=lm("y~.",df)
+  sm=stepAIC(m,direction="backward", steps=1000, trace=0)
+  
+  
+  # selected coef
+  df$y=NULL
+  allCoef=colnames(df)
+  selectedPredictors=names(sm$coefficients)
+  allCoef01= ifelse(allCoef %in% selectedPredictors, 1, 0)
+  sm$allCoef=allCoef01
+  
+  return(sm)
 }
 
 getCoef<-function(m){
