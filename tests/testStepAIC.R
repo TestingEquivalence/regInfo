@@ -2,6 +2,7 @@ library(MASS)
 
 source("models/regressionModel1.R")
 source("simulation.R")
+source("selection/stepAIC.R")
 
 scenarioNr=1
 regMod1=getLinearModel1()
@@ -25,18 +26,8 @@ steps=1000
 
 # stepwise AIC
 calibrate<-function(df){
-  m=lm("y~.",df)
-  sm=stepAIC(m,direction="backward", steps=1000, trace=0)
-  
-  
-  # selected coef
-  df$y=NULL
-  allCoef=colnames(df)
-  selectedPredictors=names(sm$coefficients)
-  allCoef01= ifelse(allCoef %in% selectedPredictors, 1, 0)
-  sm$allCoef=allCoef01
-  
-  return(sm)
+  m=calibrate_stepAIC(df,direction,steps)
+  return(m)
 }
 
 getCoef<-function(m){

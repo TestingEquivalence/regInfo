@@ -40,3 +40,25 @@ LASSO.predict<-function(m, outOfSample){
   return(res)
 }
 
+LASSO.relaxed.calibrate<-function(df, nfolds){
+  x=df
+  x$y=NULL
+  x=as.matrix(x)
+  y=df$y
+  
+  # fit LASSO model
+  # alpha=1 is the lasso penalty
+  fit = glmnet(x, y, alpha = 1, relax=TRUE)
+  m=fit$relaxed
+  
+  # perform cross-validation
+  cvfit = cv.glmnet(x, y, nfolds=nfolds,alpha = 1) # alpha=1 is the lasso penalty 
+  
+  # get the best lambda value
+  bestLambda = cvfit$lambda.min
+  
+  m$bestLambda=bestLambda
+  return(m)
+}
+
+
