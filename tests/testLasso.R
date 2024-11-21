@@ -18,37 +18,26 @@ outOfSample$y=NULL
 
 
 mLasso=LASSO.calibrate(df,10)
-mLasso$bestLambda
 vLasso=LASSO.predict(mLasso,outOfSample)
 
 mRelaxed=LASSO.relaxed.calibrate(df,10)
-mRelaxed$bestLambda
-mRelaxed$bestLambda=mLasso$bestLambda
+mRelaxed$lambda.min
+mRelaxed$lambda.min=mLasso$lambda.min
 vRelaxed=LASSO.predict(mRelaxed,outOfSample)
+
+mAdoptiv=LASSO.adaptive.calibrate(df,10)
+mAdoptiv$lambda.min=mLasso$lambda.min
+vAdoptiv=LASSO.predict(mAdoptiv,outOfSample)
 
 LASSO.getCoef(mLasso)
 LASSO.getCoef(mRelaxed)
+LASSO.getCoef(mAdoptiv)
+
 vDiff=vRelaxed-vLasso
 min(vDiff)
 max(vDiff)
 
-
-## Perform ridge regression using  CV
-x=df
-x$y=NULL
-x=as.matrix(x)
-y=df$y
-rcv = cv.glmnet(x, y, type.measure = "mse", nfold = 10,
-                       #  ‘alpha = 0’ the ridge penalty.
-                       alpha = 0)
-# cv optimal ridge coefficients, without intercept
-cvRidgeCoef = as.numeric(coef(rcv, s = rcv$lambda.min))[-1]
-
-# Perform adaptive LASSO using cv and ridge coefficients
-fit = cv.glmnet(x, y, type.measure = "mse",
-                        nfold = 10,
-                        # ‘alpha = 1’ is the lasso penalty
-                        alpha = 1,
-                        penalty.factor = 1 / abs(cvRidgeCoef))
-
+vDiff=vAdoptiv-vLasso
+min(vDiff)
+max(vDiff)
 
