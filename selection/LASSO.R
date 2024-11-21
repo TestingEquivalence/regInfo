@@ -11,7 +11,7 @@ LASSO.calibrate<-function(df, nfolds){
   fit = glmnet(x, y, alpha = 1)
   
   # perform cross-validation
-  cvfit = cv.glmnet(x, y, nfolds=nfolds,alpha = 1) # alpha=1 is the lasso penalty 
+  cvfit = cv.glmnet(x, y, nfolds=nfolds,alpha = 1, type.measure = "mse") # alpha=1 is the lasso penalty 
 
   # get the best lambda value
   bestLambda = cvfit$lambda.min
@@ -52,7 +52,7 @@ LASSO.relaxed.calibrate<-function(df, nfolds){
   m=fit$relaxed
   
   # perform cross-validation
-  cvfit = cv.glmnet(x, y, nfolds=nfolds,alpha = 1) # alpha=1 is the lasso penalty 
+  cvfit = cv.glmnet(x, y, nfolds=nfolds,alpha = 1, type.measure = "mse") # alpha=1 is the lasso penalty 
   
   # get the best lambda value
   bestLambda = cvfit$lambda.min
