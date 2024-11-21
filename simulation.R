@@ -1,13 +1,12 @@
-simulate<-function(calibrate, predict, getCoef,inSampleSet,outOfSample, outOfSampleResponce){
+simulate<-function(calibrate, predict, getCoef,inSampleSet,outOfSample, outOfSampleResponce, trueCoef){
   vmse=c()
   vRsquared=c()
-  vcoef=list()
+  nCorrectNonZero=c()
+  nWrongNonZero=c()
   
-  i=1
   for(df in inSampleSet){
     m=calibrate(df)
-    vcoef[[i]]=getCoef(m)
-
+    
     predicted=predict(m, outOfSample)
     resid=outOfSampleResponce-predicted
 
@@ -21,31 +20,27 @@ simulate<-function(calibrate, predict, getCoef,inSampleSet,outOfSample, outOfSam
     Rsquared=1-SS_res/SS_tot
     vRsquared=c(vRsquared,Rsquared)
     
-    i=i+1
+    vCoef=getCoef(m)
+    coefEval=evaluateCoef(vCoef,trueCoef)
+    nCorrectNonZero=c(nCorrectNonZero,coefEval$nCorrectNonZero)
+    nWrongNonZero= c(nWrongNonZero, coefEval$nWrongNonZero)
   }
   
   res=list()
-  res$coef=vcoef
   res$mse=vmse
   res$rSquared=vRsquared
+  res$nCorrectNonZero=nCorrectNonZero
+  res$nWrongNonZero=nWrongNonZero
   
   return(res)
 }
 
 evaluateCoef<-function(vCoef, trueCoef){
-  nCorrectNonZero=c()
-  nWrongNonZero=c()
   boolTrueCoef=(trueCoef!=0)
-  
-  i=1
-  for (v in vCoef){
-    bv=(v!=0)
-    nCorrectNonZero[i]=sum(bv & boolTrueCoef)
-    nWrongNonZero[i]=sum(!boolTrueCoef & bv)
-    i=i+1
-  }
-  
-  res=data.frame(nCorrectNonZero,nWrongNonZero)
+  bv=(vCoef!=0)
+  res=list()
+  res$nCorrectNonZero=sum(bv & boolTrueCoef)
+  res$nWrongNonZero=sum(!boolTrueCoef & bv)
   return(res)
 }
 

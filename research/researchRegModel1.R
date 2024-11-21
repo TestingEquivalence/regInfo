@@ -29,10 +29,7 @@ predict<-function(m, outOfSample){
   return(y)
 }
 
-res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
-cres=evaluateCoef(res$coef,regMod1$beta)
-df=data.frame(mse=res$mse, rSquared=res$rSquared, 
-              nCorrectNonZero=cres$nCorrectNonZero, nWrongNonZero=cres$nWrongNonZero)
+res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce, regMod1$beta)
 write.csv(df, "simRes_knownModel.csv")
 
 # full model
