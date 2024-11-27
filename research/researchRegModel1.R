@@ -13,8 +13,11 @@ outOfSample=regMod1$getSample(regMod1,sizeOOS,regMod1$scenario[[scenarioNr]]$err
 outOfSampleResponce=outOfSample$y
 outOfSample$y=NULL
 
+ls=startSummary()
+nCorrect=7
 
 # error only, coefficients are known, also full oracle
+sname="known_model"
 calibrate<-function(df){
   return(regMod1$beta)
 }
@@ -29,8 +32,10 @@ predict<-function(m, outOfSample){
   return(y)
 }
 
-res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce, regMod1$beta)
-write.csv(df, "simRes_knownModel.csv")
+df=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce, regMod1$beta)
+write.csv(df, paste0(sname,".csv"))
+ls=appendSummary(ls,df,sname, nCorrect)
+write.csv(as.data.frame(ls), "summary.csv")
 
 # full model
 

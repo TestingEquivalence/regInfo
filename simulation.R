@@ -91,3 +91,53 @@ evaluateCoef2<-function(vCoef, vTrueCoef){
   res=data.frame(nCorrectNonZero,nWrongNonZero)
   return(res)
 }
+
+appendSummary<-function(ls,df, name, nCorrect){
+  ls$name=c(ls$name, name)
+  ls$mse=c(ls$mse, mean(df$mse))
+  ls$sd.mse=c(ls$sd.mse, sd(df$mse))
+  
+  ls$rSquared =c(ls$rSquared, mean(df$rSquared))
+  ls$sd.rSquared=c(ls$sd.rSquared,   sd(df$rSquared))
+  
+  ls$nCorrectNonZero=c(ls$nCorrectNonZero, mean(df$nCorrectNonZero))
+  ls$sd.nCorrectNonZero=c(ls$sd.nCorrectNonZero, sd(df$nCorrectNonZero))
+  
+  ls$nWrongNonZero= c(ls$nWrongNonZero, mean(df$nWrongNonZero))
+  ls$sd.nWrongNonZero=c(ls$sd.nWrongNonZero,  sd(df$nWrongNonZero))
+  
+  tdr=df$nCorrectNonZero/nCorrect
+  ls$tdr= c(ls$tdr, mean(tdr))
+  ls$sd.tdr= c(ls$sd.tdr, sd(tdr))
+  
+  v=df$nCorrectNonZero+df$nWrongNonZero
+  fdr=ifelse(v == 0, 0, df$nWrongNonZero / v)
+  ls$fdr=c(ls$fdr, mean(fdr))
+  ls$sd.fdr=c(ls$sd.fdr,  sd(fdr))
+  
+  return(ls)
+}
+
+startSummary<-function(){
+  ls=list()
+  ls$name=vector("character")
+  ls$mse=vector("numeric")
+  ls$sd.mse=vector("numeric")
+  
+  ls$rSquared = vector("numeric")
+  ls$sd.rSquared=vector("numeric")
+  
+  ls$nCorrectNonZero= vector("numeric")
+  ls$sd.nCorrectNonZero= vector("numeric")
+  
+  ls$nWrongNonZero= vector("numeric")
+  ls$sd.nWrongNonZero= vector("numeric")
+  
+  ls$tdr=vector("numeric")
+  ls$sd.tdr=vector("numeric")
+  
+  ls$fdr=vector("numeric")
+  ls$sd.fdr=vector("numeric")
+  
+  return(ls)
+}
