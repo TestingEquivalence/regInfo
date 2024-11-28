@@ -38,6 +38,7 @@ ls=appendSummary(ls,df,sname, nCorrect)
 write.csv(as.data.frame(ls), "summary.csv")
 
 # full model
+sname="full_model"
 
 calibrate<-function(df){
   m=lm("y~.",df)
@@ -52,18 +53,13 @@ predict<-function(m,outOfSample){
   return(predict.lm(m,outOfSample))
 }
 
-res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
-res$mse
-cres=evaluateCoef(res$coef,regMod1$beta)
-
-res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
-cres=evaluateCoef(res$coef,regMod1$beta)
-df=data.frame(mse=res$mse, rSquared=res$rSquared, 
-              nCorrectNonZero=cres$nCorrectNonZero, nWrongNonZero=cres$nWrongNonZero)
-write.csv(df, "simRes_fullModel.csv")
-
+df=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce, regMod1$beta)
+write.csv(df, paste0(sname,".csv"))
+ls=appendSummary(ls,df,sname, nCorrect)
+write.csv(as.data.frame(ls), "summary.csv")
 
 # oracle model where all non zero variables are selected
+sname="selection_oracle"
 
 calibrate<-function(df){
   m=lm(regMod1$oracle,df)
@@ -76,11 +72,10 @@ predict<-function(m,outOfSample){
   return(predict.lm(m,outOfSample))
 }
 
-res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
-cres=evaluateCoef(res$coef,regMod1$beta)
-df=data.frame(mse=res$mse, rSquared=res$rSquared, 
-              nCorrectNonZero=cres$nCorrectNonZero, nWrongNonZero=cres$nWrongNonZero)
-write.csv(df, "simRes_oracleSelection.csv")
+df=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce, regMod1$beta)
+write.csv(df, paste0(sname,".csv"))
+ls=appendSummary(ls,df,sname, nCorrect)
+write.csv(as.data.frame(ls), "summary.csv")
 
 
 # stepwise selection using AIC, Mallows Cp, BIC, adjR2
@@ -100,20 +95,19 @@ predict<-function(m, outOfSample){
   return(y)
 }
 
-
-for (method in methods){
-  for (selector in selectors){
+for (selector in selectors){
+  for (method in methods){
     calibrate<-function(df){
       m=regsubset.calibrate(df,method, selector)
       return(m)
     }
     
-    res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
-    cres=evaluateCoef(res$coef,regMod1$beta)
-    df=data.frame(mse=res$mse, rSquared=res$rSquared, 
-                  nCorrectNonZero=cres$nCorrectNonZero, nWrongNonZero=cres$nWrongNonZero)
-    write.csv(df, "simRes_oracleSelection.csv")
-
+    sname=paste0(selector,"_",method)
+    
+    df=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce, regMod1$beta)
+    write.csv(df, paste0(sname,".csv"))
+    ls=appendSummary(ls,df,sname, nCorrect)
+    write.csv(as.data.frame(ls), "summary.csv")
   }
 }
 
