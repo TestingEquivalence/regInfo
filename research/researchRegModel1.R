@@ -80,10 +80,10 @@ write.csv(as.data.frame(ls), "summary.csv")
 
 # stepwise selection using AIC, Mallows Cp, BIC, adjR2
 # Search methods available are: 
-methods={"backward"; "forward"; "exhaustive"; "seqrep"}
+methods=c("backward", "forward", "exhaustive", "seqrep")
 # Selectorrs for penalty terms are:
-selectors={"cp"; "bic" ; "adjR2"}
-source("regsubsetSel.R")
+selectors=c("cp", "bic" , "adjR2")
+source("selection/regsubsetSel.R")
 
 getCoef<-function(m){
   v=regsubset.getCoef(m)
