@@ -89,7 +89,6 @@ getCoef<-function(m){
   v=regsubset.getCoef(m)
 }
 
-
 predict<-function(m, outOfSample){
   y=predict.lm(m,outOfSample)
   return(y)
@@ -114,13 +113,37 @@ for (selector in selectors){
 
 
 # LASSO using cross validation to find optimal parameter lambda 
-source("LASSO.R")
+source("selection/LASSO.R")
 
 # try different values of cross validation: 5, 10 and 20
-calibrate<-function(df){
-  m=LASSO.calibrate(df,20)
-  return(m)
+getCoef<-function(m){
+  v=LASSO.getCoef(m)
 }
+
+predict<-function(m, outOfSample){
+  y=LASSO.predict(m,outOfSample)
+  return(y)
+}
+
+for (nfolds in c(5,10,20)){
+  
+  calibrate<-function(df){
+    m=LASSO.calibrate(df,nfolds)
+    return(m)
+  }
+  
+  sname=paste0("Lasso_",nfolds)
+  
+  df=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce, regMod1$beta)
+  write.csv(df, paste0(sname,".csv"))
+  ls=appendSummary(ls,df,sname, nCorrect)
+  write.csv(as.data.frame(ls), "summary.csv")
+}
+
+# relaxed LASSO using cross validation to find optimal parameter lambda 
+source("selection/LASSO.R")
+
+# try different values of cross validation: 5, 10 and 20
 
 getCoef<-function(m){
   v=LASSO.getCoef(m)
@@ -131,11 +154,50 @@ predict<-function(m, outOfSample){
   return(y)
 }
 
-res=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce)
-cres=evaluateCoef(res$coef,regMod1$beta)
+for (nfolds in c(5,10,20)){
+  
+  calibrate<-function(df){
+    m=LASSO.relaxed.calibrate(df,nfolds)
+    return(m)
+  }
+  
+  sname=paste0("relax_Lasso_",nfolds)
+  
+  df=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce, regMod1$beta)
+  write.csv(df, paste0(sname,".csv"))
+  ls=appendSummary(ls,df,sname, nCorrect)
+  write.csv(as.data.frame(ls), "summary.csv")
+}
 
-write.csv(res$mse,file="mse.csv")
-write.csv(cres, file="coef.csv")
+# adoptive LASSO using cross validation to find optimal parameter lambda 
+source("selection/LASSO.R")
+
+# try different values of cross validation: 5, 10 and 20
+
+getCoef<-function(m){
+  v=LASSO.getCoef(m)
+}
+
+predict<-function(m, outOfSample){
+  y=LASSO.predict(m,outOfSample)
+  return(y)
+}
+
+for (nfolds in c(5,10,20)){
+  
+  calibrate<-function(df){
+    m=LASSO.adaptive.calibrate(df,nfolds)
+    return(m)
+  }
+  
+  sname=paste0("adopt_Lasso_",nfolds)
+  
+  df=simulate(calibrate,predict,getCoef,inSampleSet,outOfSample, outOfSampleResponce, regMod1$beta)
+  write.csv(df, paste0(sname,".csv"))
+  ls=appendSummary(ls,df,sname, nCorrect)
+  write.csv(as.data.frame(ls), "summary.csv")
+}
+
 
 # use knockoff to select relevant covariates
 source("knockoff.R")
