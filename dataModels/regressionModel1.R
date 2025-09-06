@@ -10,12 +10,12 @@
 
 library(mvtnorm)
 
-getLinearModel1<-function(){
+getSubModel<-function(){
   m=list()
-  m$nOfCovariates=15
+  m$d=15
   
   # Create the covariance matrix
-  sigma=diag(1, m$nOfCovariates)  # Create a diagonal matrix with diagonal entries as 1
+  sigma=diag(1, m$d)  # Create a diagonal matrix with diagonal entries as 1
   sigma[1,5]=0.7
   sigma[5,1]=sigma[1,5]
   sigma[1,10]=0.5
@@ -34,7 +34,7 @@ getLinearModel1<-function(){
   sigma[12,11]=sigma[11,12]
   m$sigma=sigma
   
-  beta=rep(0, m$nOfCovariates)
+  beta=rep(0, m$d)
   beta[4]=-0.5
   beta[5]=0.5
   beta[6]=0.5
@@ -43,43 +43,48 @@ getLinearModel1<-function(){
   beta[9]=1
   beta[10]=1.5
   m$beta=beta
-  
-  m$oracle="y~x4+x5+x6+x7+x8+x9+x10"
-  
-  scenario=list()
-  scenario[[1]]=list(n=100, errVariance=6.25)
-  scenario[[2]]=list(n=100, errVariance=2.50)
-  scenario[[3]]=list(n=400, errVariance=6.25)
-  scenario[[4]]=list(n=400, errVariance=2.50)
-  
-  m$scenario=scenario
-  
-  m$getSampleCovariates<-function(m,n){
-    return(rmvnorm(n,sigma=m$sigma))
-  }
-  
-  m$getSample<-function(m,n, errVariance){
-    x=m$getSampleCovariates(m,n)
-    y=x %*% m$beta
-    y=y[,1]
-    err=rnorm(n,0,sqrt(errVariance))
-    y=y+err
-    x=as.data.frame(x)
-    colnames(x)=paste0("x",c(1:m$nOfCovariates))
-    x$y=y
-    return(x)
-  }
-  
-  m$getSampleScenario<-function(m,scenarioNr, nSample){
-    errVariance=m$scenario[[scenarioNr]]$errVariance
-    n=m$scenario[[scenarioNr]]$n
-    
-    res=list()
-    for (i in c(1:nSample)){
-      res[[i]]=m$getSample(m,n,errVariance)
-    }
-    return(res)
-  }
-  
-  return(m)
+
 }
+
+getModel1<-function(){
+  m=getSubModel()
+  m$errVariance=6.25
+  m$sizeInSample=100
+}
+
+getModel2<-function(){
+  m=getSubModel()
+  m$errVariance=2.50
+  m$sizeInSample=100
+}
+
+getModel3<-function(){
+  m=getSubModel()
+  m$errVariance=6.25
+  m$sizeInSample=400
+}
+
+
+getModel4<-function(){
+  m=getSubModel()
+  m$errVariance=2.50
+  m$sizeInSample=400
+}
+
+getSampleCovariatesLM<-function(m,n){
+  return(rmvnorm(n,sigma=m$sigma))
+}
+
+getSampleLM<-function(m,n, errVariance){
+  x=m$getSampleCovariates(m,n)
+  y=x %*% m$beta
+  y=y[,1]
+  err=rnorm(n,0,sqrt(errVariance))
+  y=y+err
+  x=as.data.frame(x)
+  colnames(x)=paste0("x",c(1:m$nOfCovariates))
+  x$y=y
+  return(x)
+}  
+  
+  
