@@ -25,21 +25,77 @@ simulate<-function(getModel, getSample, getCalibration, getPrediction,
    return (res)
 }
 
+simulatePartial<-function(getCalibration, getPrediction, inSamples, oos){
+  
+  res=list()
+  
+  for (sample in inSamples){
+    mods=getCalibration(sample$data)
+    pred=getPrediction(mods,oos$data)
+    r=evaluate(oos,pred)
+    res=append(res,list(r))
+  }
+  
+  return (res)
+}
+
 evaluate<-function(oos,pred){
   res=list()
   
   for(py in pred){
    r=list()
    
-   v=py-mean(py)
+   v=oos$data$y-mean(oos$data$y)
    r$maxSSE=mean(v^2)
    
-   v=oos$y-py
+   v=oos$data$y-py
    r$predSSE=mean(v^2)
    
    v=oos$err
    r$minSSE=mean(v^2)
    
-   res=append(res,r)
+   res=append(res,list(r))
   }
+  return(res)
+}
+
+getSampleLM<-function(m,n){
+  res=list()
+  x=rmvnorm(n,sigma=m$sigma)
+  f=x %*% m$beta
+  f=f[,1]
+  
+  err=rnorm(n,0,sqrt(m$errVariance))
+  y=f+err
+  
+  x=as.data.frame(x)
+  colnames(x)=paste0("x",c(1:m$d))
+  x$y=y
+  
+  res$data=x
+  res$err=err
+  res$f=f
+  return(res)
+}  
+
+getSamples<-function(m,n, nSample, getSample){
+  res=list()
+  for (i in 1:nSample){
+    res=append(res, list(getSample(m,n)))
+  }
+  return(res)
+}
+
+getReferenceLM<-function(data){
+  m=lm(y~.,data)
+  return(list(m))
+}
+
+getPredictionLM<-function(mods,data){
+  res=list()
+  for (m in mods){
+    v=predict.lm(m,data)
+    res=append(res,list(v))
+  }
+  return(res)
 }

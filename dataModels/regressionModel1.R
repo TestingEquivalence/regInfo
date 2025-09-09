@@ -43,25 +43,28 @@ getSubModel<-function(){
   beta[9]=1
   beta[10]=1.5
   m$beta=beta
-
+  return(m)
 }
 
 getModel1<-function(){
   m=getSubModel()
   m$errVariance=6.25
   m$sizeInSample=100
+  return(m)
 }
 
 getModel2<-function(){
   m=getSubModel()
   m$errVariance=2.50
   m$sizeInSample=100
+  return(m)
 }
 
 getModel3<-function(){
   m=getSubModel()
   m$errVariance=6.25
   m$sizeInSample=400
+  return(m)
 }
 
 
@@ -69,22 +72,7 @@ getModel4<-function(){
   m=getSubModel()
   m$errVariance=2.50
   m$sizeInSample=400
+  return(m)
 }
 
-getSampleCovariatesLM<-function(m,n){
-  return(rmvnorm(n,sigma=m$sigma))
-}
-
-getSampleLM<-function(m,n, errVariance){
-  x=m$getSampleCovariates(m,n)
-  y=x %*% m$beta
-  y=y[,1]
-  err=rnorm(n,0,sqrt(errVariance))
-  y=y+err
-  x=as.data.frame(x)
-  colnames(x)=paste0("x",c(1:m$nOfCovariates))
-  x$y=y
-  return(x)
-}  
-  
   

@@ -3,7 +3,7 @@ source("simulation.R")
 source("selection/LASSO.R")
 
 scenarioNr=1
-regMod1=getLinearModel1()
+regMod1=getModel1()
 nSample=1
 
 set.seed(10071977)
