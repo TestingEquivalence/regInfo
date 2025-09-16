@@ -47,6 +47,16 @@ df=eval.transformToDF(simRes)
 meanQtSSE$forward=eval.meanQtSSE(v,df)
 QtOfMeansSSE$forward=eval.QtMeanSSE(v,df)
 
+# calibrate seqrep model
+
+simRes=simulatePartial(getCalibration = seqrep.calibrate, 
+                       getPrediction = getPredictionLM, 
+                       inSamples, oos)
+df=eval.transformToDF(simRes)
+
+meanQtSSE$seqrep=eval.meanQtSSE(v,df)
+QtOfMeansSSE$seqrep=eval.QtMeanSSE(v,df)
+
 
 # save results
 meanQtSSE=as.data.frame(meanQtSSE)
