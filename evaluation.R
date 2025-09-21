@@ -28,7 +28,7 @@ eval.refModRes<-function(simRes){
 eval.meanQtSSE<-function(v,df){
   qt=as.data.frame(sweep(df, 1, v, `/`))
   qt=qt-1
-  qt=colMeans(qt)
+  qt=colMeans(qt, na.rm = TRUE)
   return(qt)
 }
 
@@ -36,6 +36,6 @@ eval.QtMeanSSE<-function(v,df){
   mv=mean(v)
   df=df/mv
   df=df-1
-  res=colMeans(df)
+  res=colMeans(df, na.rm = TRUE)
   return(res)
 }

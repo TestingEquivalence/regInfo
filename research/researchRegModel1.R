@@ -2,6 +2,7 @@ source("dataModels/regressionModel1.R")
 source("simulation.R")
 source("evaluation.R")
 source("models/regsubsetSel.R")
+source("models/LASSO.R")
 
 m=getModel1()
 nSamples=10000
@@ -49,13 +50,23 @@ QtOfMeansSSE$forward=eval.QtMeanSSE(v,df)
 
 # calibrate seqrep model
 
-simRes=simulatePartial(getCalibration = seqrep.calibrate, 
+simRes=simulatePartial(getCalibration = lasso, 
                        getPrediction = getPredictionLM, 
                        inSamples, oos)
 df=eval.transformToDF(simRes)
 
 meanQtSSE$seqrep=eval.meanQtSSE(v,df)
 QtOfMeansSSE$seqrep=eval.QtMeanSSE(v,df)
+
+# calibrate lasso
+
+simRes=simulatePartial(getCalibration = LASSO.calibrate, 
+                       getPrediction = LASSO.predict, 
+                       inSamples, oos)
+df=eval.transformToDF(simRes)
+
+meanQtSSE$lasso=eval.meanQtSSE(v,df)
+QtOfMeansSSE$lasso=eval.QtMeanSSE(v,df)
 
 
 # save results
