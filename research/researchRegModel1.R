@@ -69,6 +69,36 @@ meanQtSSE$lasso=eval.meanQtSSE(v,df)
 QtOfMeansSSE$lasso=eval.QtMeanSSE(v,df)
 
 
+# calibrate relaxed lasso with fixed relaxation parameter
+
+# gamma=1 yields lasso, gamma=0 is completely relaxed, also SSE refit
+
+getCalibration=function(data){
+  RelaxedLasso.calibrate(data, gamma=0.75)
+}
+
+simRes=simulatePartial(getCalibration = getCalibration, 
+                       getPrediction = RelaxedLasso.predict, 
+                       inSamples, oos)
+df=eval.transformToDF(simRes)
+
+
+meanQtSSE$rlasso_075=eval.meanQtSSE(v,df)
+QtOfMeansSSE$rlasso_075=eval.QtMeanSSE(v,df)
+
+# calibrate  relaxed lasso using best CV relaxation parameter for every model size
+
+simRes=simulatePartial(getCalibration = relaxedLassoCV.calibrate, 
+                       getPrediction = relaxedLassoCV.predict, 
+                       inSamples, oos)
+df=eval.transformToDF(simRes)
+
+
+meanQtSSE$rlasso_075=eval.meanQtSSE(v,df)
+QtOfMeansSSE$rlasso_075=eval.QtMeanSSE(v,df)
+
+
+
 # save results
 meanQtSSE=as.data.frame(meanQtSSE)
 QtOfMeansSSE=as.data.frame(QtOfMeansSSE)
@@ -76,5 +106,5 @@ QtOfMeansSSE=as.data.frame(QtOfMeansSSE)
 saveRDS(meanQtSSE,"meanQtSSE.rds")
 saveRDS(QtOfMeansSSE,"QtOfMeansSSE.rds")
 
-write.csv(meanQtSSE,"meanQtSSE.csv")
-write.csv(QtOfMeansSSE,"QtOfMeansSSE.csv")
+write.csv2(meanQtSSE,"meanQtSSE.csv")
+#write.csv(QtOfMeansSSE,"QtOfMeansSSE.csv")

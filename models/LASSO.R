@@ -10,7 +10,6 @@ LASSO.calibrate<-function(data){
   n_active = apply(coef(fit)[-1, ] != 0, 2, sum)  # exclude intercept
   
   lambda2size=list()
-  lidx=list()
   
   max_size=ncol(x)
   for (k in 1:max_size) {
@@ -21,7 +20,6 @@ LASSO.calibrate<-function(data){
       lambda2size[[k]]=NA
     }
   }
-  
   
  res=list()
  res$fit=fit
