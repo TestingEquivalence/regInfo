@@ -1,6 +1,7 @@
 library(glmnet)
 
 # Fit relaxed lasso and select lambda for each model size
+# gamma=1 yields lasso, gamma=0 is completely relaxed, also SSE refit
 RelaxedLasso.calibrate<-function(data, gamma){
   x=data
   x$y=NULL

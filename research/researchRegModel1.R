@@ -94,8 +94,36 @@ simRes=simulatePartial(getCalibration = relaxedLassoCV.calibrate,
 df=eval.transformToDF(simRes)
 
 
-meanQtSSE$rlasso_075=eval.meanQtSSE(v,df)
-QtOfMeansSSE$rlasso_075=eval.QtMeanSSE(v,df)
+meanQtSSE$rlassoCV=eval.meanQtSSE(v,df)
+QtOfMeansSSE$rlassoCV=eval.QtMeanSSE(v,df)
+
+# calibrate relaxed elastic net with fixed parameter
+# gamma=1 yields is not relaxed; gamma=0 is completely relaxed, also SSE refit
+# alpha=1 yields lasso, alpha =0 yields ridge regression
+
+getCalibration=function(data){
+  elastic.net.fixed.calibrate(data, gamma=0, alpha=0.75)
+}
+
+simRes=simulatePartial(getCalibration = getCalibration, 
+                       getPrediction = elastic.net.fixed.predict, 
+                       inSamples, oos)
+df=eval.transformToDF(simRes)
+
+
+meanQtSSE$elasticNet_gamma0_alpha075=eval.meanQtSSE(v,df)
+QtOfMeansSSE$elasticNet_gamma0_alpha075=eval.QtMeanSSE(v,df)
+
+# calibrate relaxed elastic net using CV for optimal gamma and alpha
+
+simRes=simulatePartial(getCalibration = elasticNet.CV.calibrate, 
+                       getPrediction = elasticNet.CV.predict, 
+                       inSamples, oos)
+df=eval.transformToDF(simRes)
+
+
+meanQtSSE$elasticNetCV=eval.meanQtSSE(v,df)
+QtOfMeansSSE$elasticNetCV=eval.QtMeanSSE(v,df)
 
 
 

@@ -29,11 +29,14 @@ simulatePartial<-function(getCalibration, getPrediction, inSamples, oos){
   
   res=list()
   
+  i=0
   for (sample in inSamples){
     mods=getCalibration(sample$data)
     pred=getPrediction(mods,oos$data)
     r=evaluate(oos,pred)
     res=append(res,list(r))
+    print(paste0("sim: ",i))
+    i=i+1
   }
   
   return (res)
