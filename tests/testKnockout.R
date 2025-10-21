@@ -1,70 +1,20 @@
-library(knockoff)
-#library(doParallel)
+set.seed(123)
+n <- 100; p <- 15
+X <- matrix(rnorm(n * p), n, p)
+beta <- c(2, 1.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+y <- X %*% beta + rnorm(n)
 
-source("regressionModel1.R")
-source("simulation.R")
-source("regsubsetSel.R")
+data=as.data.frame(X)
+data$y=y
 
-scenarioNr=1
-regMod1=getLinearModel1()
-nSample=1
+res_fast =knockoff.calibrate(data)
 
-set.seed(10071977)
-inSampleSet=regMod1$getSampleScenario(regMod1,scenarioNr,nSample)
-df=inSampleSet[[1]]
+# View ranked order
+res_fast$ranking
 
-set.seed(18032024)
-outOfSample=regMod1$getSample(regMod1,sizeOOS,regMod1$scenario[[scenarioNr]]$errVariance)
-outOfSampleResponce=outOfSample$y
-outOfSample$y=NULL
+# Top 5 selected variable indices
+res_fast$selected$k5
 
-originalKnockoffStat = function(X, X_k, y) {
-  abs(t(X) %*% y) - abs(t(X_k) %*% y)
-}
-
-defaultStatistic=stat.glmnet_coefdiff
-
-X=df
-X$y=NULL
-y=df$y
-
-result = knockoff.filter(X, y, fdr = 0.20, statistic = defaultStatistic)
-
-print(result)
-summary(result)
-
-if (length(result$selected)>0) {
-  selectedPredictors=names(result$selected)
-  frm= paste0("y~",paste(selectedPredictors, collapse = " + "))
-} else
-{
-  frm="y~1" 
-  selectedPredictors=c()
-}
-
-frm
-m=lm(frm,df)
-summary(m)
-
-predicted=predict(m, outOfSample)
-mse=mean((outOfSampleResponce - predicted)^2)
-mse
-
-
-allCoef=colnames(outOfSample)
-
-
-# Generate a vector of 1s and 0s
-allCoef01= ifelse(allCoef %in% selectedPredictors, 1, 0)
-allCoef
-selectedPredictors
-allCoef01
-
-
-
-v=getCoef(m)
-trueCoef=regMod1$beta
-boolTrueCoef=(trueCoef!=0)
-bv=(v!=0)
-nCorrectNonZero[i]=sum(bv & boolTrueCoef)
-nWrongNonZero[i]=sum(!boolTrueCoef & bv)
+# You can later fit models like this:
+X_top5 <- X[, res_fast$selected$k5, drop = FALSE]
+lm(y ~ X_top5)

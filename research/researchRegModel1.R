@@ -5,7 +5,7 @@ source("models/regsubsetSel.R")
 source("models/LASSO.R")
 
 m=getModel1()
-nSamples=10000
+nSamples=10 #000
 sizeOOS=100000
 
 # result
@@ -118,6 +118,12 @@ QtOfMeansSSE$elasticNet_gamma0_alpha075=eval.QtMeanSSE(v,df)
 
 simRes=simulatePartial(getCalibration = elasticNet.CV.calibrate, 
                        getPrediction = elasticNet.CV.predict, 
+                       inSamples, oos)
+df=eval.transformToDF(simRes)
+
+# calibrate using knockout techniques
+simRes=simulatePartial(getCalibration = knockoff.calibrate, 
+                       getPrediction = getPredictionLM,
                        inSamples, oos)
 df=eval.transformToDF(simRes)
 

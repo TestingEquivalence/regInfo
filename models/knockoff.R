@@ -1,44 +1,31 @@
 library(knockoff)
-library(doParallel)
+library(glmnet)
 
-# statistics to use with knockoff
-# stat.glmnet_coefdiff is standard statistic of knockoff filter
-# or originalstatistic from the knockoff paper
-
-originalKnockoffStat = function(X, X_k, y) {
-  abs(t(X) %*% y) - abs(t(X_k) %*% y)
+knockoff.calibrate <- function(data) {
+  nlambda = 1000
+  x=data
+  x$y=NULL
+  x=as.matrix(x)
+  y=data$y
+  p=ncol(x)
+  
+  # 1. Create knockoff copies
+  knock <- create.fixed(X)
+  x_k <- knock$Xk
+  
+  # 2. Fit Lasso on combined [X | X_k]
+  fit = glmnet(cbind(x, x_k), y, nlambda = nlambda, standardize = TRUE)
+  
+  # 3. Compute W-statistics
+  W = stat.glmnet_coefdiff(x, x_k, y)
+  
+  # 4. Rank variables by absolute importance
+  ranking = order(abs(W), decreasing = TRUE)
+  
+  models =lapply(seq_len(p), function(k) {
+    vars = colnames(x)[ranking[1:k]]
+    df =data.frame(y = y, x[, vars, drop = FALSE])
+    m=lm("y ~.", data = df)
+    return(m)
+  })
 }
-
-
-knockoff.calibrate<-function(df, fdr, statistic=stat.glmnet_coefdiff){
-  X=df
-  X$y=NULL
-  y=df$y
-
-  result = knockoff.filter(X, y, fdr = fdr, statistic = statistic)
-  
-  if (length(result$selected)>0) {
-      selectedPredictors=names(result$selected)
-      frm= paste0("y~",paste(selectedPredictors, collapse = " + "))
-  } else{
-     frm="y~1" 
-     selectedPredictors=c()
-  }
-  
-  m=lm(frm,df)
-  
-  # selected coef
-  df$y=NULL
-  allCoef=colnames(df)
-  allCoef01= ifelse(allCoef %in% selectedPredictors, 1, 0)
-  # allCoef
-  # selectedPredictors
-  # allCoef01
-  m$allCoef=allCoef01
-  
-  return(m)
-}
-
-
-
-
