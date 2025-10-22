@@ -1,17 +1,3 @@
-df <- data.frame(a = 1:4, b = c(2, 4, 6, 8))
-v <- c(1, 2, 3, 4)
-
-df_div <- df / v
-df_div
-
-
-
-
-
-
-tol <- 1.10   # tolerance threshold (10% worse than full model)
-output_dir <- "results"   # folder for outputs
-
 
 
 # ---------------------------------------------------------------------

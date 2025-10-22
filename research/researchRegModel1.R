@@ -12,7 +12,7 @@ sizeOOS=1000 #00
 model1=list()
 
 # load result if available
-# model1=readRDS("model1.rds")
+model1=readRDS("model1.rds")
 
 
 set.seed(10071977)
@@ -47,10 +47,10 @@ model1$forward=df
 saveRDS(model1,"model1.rds")
 
 
-# postprocessing of the simulation results
+# post-processing of the simulation results
 
-
-
+longRes=eval.lsDF2long(model1)
+sum=eval.Summary(longRes)
 
 
 
