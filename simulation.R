@@ -29,35 +29,30 @@ simulatePartial<-function(getCalibration, getPrediction, inSamples, oos){
   
   res=list()
   
-  i=0
+  i=1
   for (sample in inSamples){
     mods=getCalibration(sample$data)
     pred=getPrediction(mods,oos$data)
     r=evaluate(oos,pred)
-    res=append(res,list(r))
+    res[[i]]=r
     print(paste0("sim: ",i))
     i=i+1
   }
   
+  res=as.data.frame(do.call(rbind, res))
   return (res)
 }
 
 evaluate<-function(oos,pred){
-  res=list()
-  
+  m=length(pred)
+  res=numeric(m)
+  i=1
   for(py in pred){
-   r=list()
-   
-   v=oos$data$y-mean(oos$data$y)
-   r$maxSSE=mean(v^2)
-   
    v=oos$data$y-py
-   r$predSSE=mean(v^2)
+   predSSE=mean(v^2)
    
-   v=oos$err
-   r$minSSE=mean(v^2)
-   
-   res=append(res,list(r))
+   res[i]=predSSE
+   i=i+1
   }
   return(res)
 }
@@ -101,4 +96,10 @@ getPredictionLM<-function(mods,data){
     res=append(res,list(v))
   }
   return(res)
+}
+
+getRelMSE<-function(v,df){
+  qt=df /v
+  qt=qt-1
+  return(qt)
 }

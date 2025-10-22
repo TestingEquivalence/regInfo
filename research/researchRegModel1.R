@@ -5,48 +5,60 @@ source("models/regsubsetSel.R")
 source("models/LASSO.R")
 
 m=getModel1()
-nSamples=10 #000
-sizeOOS=100000
+nSamples=100 #00
+sizeOOS=1000 #00
 
 # result
-meanQtSSE=list()
-QtOfMeansSSE=list()
+model1=list()
 
 # load result if available
-meanQtSSE=readRDS("meanQtSSE.rds")
-QtOfMeansSSE=readRDS("QtOfMeansSSE.rds")
+# model1=readRDS("model1.rds")
+
 
 set.seed(10071977)
 inSamples=getSamples(m,n=m$sizeInSample, nSample=nSamples,getSample=getSampleLM)
 oos=getSampleLM(m,n=sizeOOS)
 
 # calibrate reference model
-simRes=simulatePartial(getCalibration = getReferenceLM, 
-                       getPrediction = getPredictionLM, 
-                       inSamples, oos)
+v=simulatePartial(getCalibration = getReferenceLM, 
+                  getPrediction = getPredictionLM, 
+                  inSamples, oos)
+v=v$V1
 
-resRefMod=eval.refModRes(simRes)
-v=resRefMod$predSSE
 
 # calibrate backward model
 
 simRes=simulatePartial(getCalibration = backward.calibrate, 
                        getPrediction = getPredictionLM, 
                        inSamples, oos)
-df=eval.transformToDF(simRes)
-
-meanQtSSE$backward=eval.meanQtSSE(v,df)
-QtOfMeansSSE$backward=eval.QtMeanSSE(v,df)
+df=getRelMSE(v,simRes)
+model1$backward=df
 
 # calibrate forward model
 
 simRes=simulatePartial(getCalibration = forward.calibrate, 
                        getPrediction = getPredictionLM, 
                        inSamples, oos)
-df=eval.transformToDF(simRes)
 
-meanQtSSE$forward=eval.meanQtSSE(v,df)
-QtOfMeansSSE$forward=eval.QtMeanSSE(v,df)
+df=getRelMSE(v,simRes)
+model1$forward=df
+
+# save result 
+saveRDS(model1,"model1.rds")
+
+
+# postprocessing of the simulation results
+
+
+
+
+
+
+
+
+
+
+
 
 # calibrate seqrep model
 
