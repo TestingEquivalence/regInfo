@@ -1,50 +1,6 @@
 
 
-# ---------------------------------------------------------------------
-# 2. Compute summary statistics per method × model size
-# ---------------------------------------------------------------------
-relMSE_summary <- relMSE_long %>%
-  group_by(method, size) %>%
-  summarise(
-    n_repeats        = n(),
-    mean_relMSE      = mean(relMSE, na.rm = TRUE),
-    sd_relMSE        = sd(relMSE, na.rm = TRUE),
-    median_relMSE    = median(relMSE, na.rm = TRUE),
-    q25              = quantile(relMSE, 0.25, na.rm = TRUE),
-    q75              = quantile(relMSE, 0.75, na.rm = TRUE),
-    q025             = quantile(relMSE, 0.025, na.rm = TRUE),
-    q975             = quantile(relMSE, 0.975, na.rm = TRUE),
-    prop_within_tol  = mean(relMSE <= tol, na.rm = TRUE)
-  ) %>%
-  ungroup()
 
-relMSE_summary_print <- relMSE_summary %>%
-  mutate(across(where(is.numeric), ~ round(.x, 3)))
-
-print(relMSE_summary_print, n = Inf)
-
-# ---------------------------------------------------------------------
-# 3. Plot 1: Faceted Mean ± SD and Median
-# ---------------------------------------------------------------------
-p_facet_meanSD <- ggplot(relMSE_summary, aes(x = size)) +
-  geom_ribbon(aes(ymin = mean_relMSE - sd_relMSE,
-                  ymax = mean_relMSE + sd_relMSE),
-              fill = "skyblue", alpha = 0.25) +
-  geom_line(aes(y = mean_relMSE), color = "blue", size = 1) +
-  geom_line(aes(y = median_relMSE), color = "darkorange",
-            linetype = "dashed", size = 1) +
-  geom_point(aes(y = mean_relMSE), color = "blue", size = 2) +
-  geom_hline(yintercept = 1, linetype = "dotted", color = "darkred") +
-  facet_wrap(~ method, scales = "free_y") +
-  labs(
-    x = "Model size (# variables)",
-    y = "Relative MSE (vs full model)",
-    title = "Prediction Loss vs. Model Size (Faceted)",
-    subtitle = "Blue = mean ± SD, Orange = median",
-    caption = paste0("Tolerance = ", tol)
-  ) +
-  theme_minimal(base_size = 14) +
-  theme(strip.text = element_text(face = "bold"))
 
 # ---------------------------------------------------------------------
 # 4. Plot 2: Faceted Proportion within Tolerance

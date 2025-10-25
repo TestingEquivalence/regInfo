@@ -1,4 +1,5 @@
 library(dplyr)
+library(readODS)
 
 # ---------------------------------------------------------------------
 # 1. Combine all methods into one tidy long data frame
@@ -47,13 +48,26 @@ eval.Summary<-function(dfLong){
   ungroup()
 }
 
-
-# # Rename 'col' -> 'size' for consistency
-# colnames(relMSE_summary)[colnames(relMSE_summary) == "col"] <- "size"
-# 
-# # Round numeric columns
-# is_num <- sapply(relMSE_summary, is.numeric)
-# relMSE_summary[is_num] <- lapply(relMSE_summary[is_num], function(x) round(x, 3))
-# 
-# # Print all rows
-# print(relMSE_summary, row.names = FALSE)
+# ---------------------------------------------------------------------
+# 3. Plot 1: Faceted Mean ± SD and Median
+# ---------------------------------------------------------------------
+p_facet_meanSD <-function(df){
+  ggplot(df, aes(x = size)) +
+  geom_ribbon(aes(ymin = mean - sd,
+                  ymax = mean + sd),
+              fill = "skyblue", alpha = 0.25) +
+  geom_line(aes(y = mean), color = "blue", linewidth = 1) +
+  geom_line(aes(y = q50), color = "darkorange",
+            linetype = "dashed", size = 1) +
+  geom_point(aes(y = mean), color = "blue", size = 2) +
+  geom_hline(yintercept = 1, linetype = "dotted", color = "darkred") +
+  facet_wrap(~ method, scales = "free_y") +
+  labs(
+    x = "Model size (# variables)",
+    y = "Relative MSE (vs full model)",
+    title = "Prediction Loss vs. Model Size (Faceted)",
+    subtitle = "Blue = mean ± SD, Orange = median"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(strip.text = element_text(face = "bold"))
+}

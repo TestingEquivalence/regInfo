@@ -52,9 +52,9 @@ saveRDS(model1,"model1.rds")
 longRes=eval.lsDF2long(model1)
 sum=eval.Summary(longRes)
 
+write_ods(sum, "summary _model1.ods")
 
-
-
+plt=p_facet_meanSD(sum)
 
 
 
