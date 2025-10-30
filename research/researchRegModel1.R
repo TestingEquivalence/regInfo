@@ -5,8 +5,8 @@ source("models/regsubsetSel.R")
 source("models/LASSO.R")
 
 m=getModel1()
-nSamples=100 #00
-sizeOOS=1000 #00
+nSamples=10000
+sizeOOS=100000
 
 # result
 model1=list()
@@ -43,6 +43,15 @@ simRes=simulatePartial(getCalibration = forward.calibrate,
 df=getRelMSE(v,simRes)
 model1$forward=df
 
+# calibrate lasso
+
+simRes=simulatePartial(getCalibration = LASSO.calibrate, 
+                       getPrediction = LASSO.predict, 
+                       inSamples, oos)
+
+df=getRelMSE(v,simRes)
+model1$lasso=df
+
 # save result 
 saveRDS(model1,"model1.rds")
 
@@ -54,31 +63,29 @@ sum=eval.Summary(longRes)
 
 write_ods(sum, "summary _model1.ods")
 
-plt=p_facet_meanSD(sum)
+#  filter summary for plot
+sum=sum[sum$size>2,]
+sum=sum[sum$size<15,]
+
+plt=p_facet_meanSD(sum, free_y = FALSE)
+plt
+plt=p_facet_prop(sum)
+plt
+plt=p_overlay_mean(sum)
+plt
+plt=p_overlay_median(sum)
+plt
+plt=p_overlay_prop(sum)
+plt
+
+# distribution of minimal model sizes across repeats, which rel MSE is below 0 first time
+
+freqMinSizes=freq_min_sizes(longRes)
+plt=p_overlay_freq(freqMinSizes)
+plt
 
 
 
-
-
-# calibrate seqrep model
-
-simRes=simulatePartial(getCalibration = lasso, 
-                       getPrediction = getPredictionLM, 
-                       inSamples, oos)
-df=eval.transformToDF(simRes)
-
-meanQtSSE$seqrep=eval.meanQtSSE(v,df)
-QtOfMeansSSE$seqrep=eval.QtMeanSSE(v,df)
-
-# calibrate lasso
-
-simRes=simulatePartial(getCalibration = LASSO.calibrate, 
-                       getPrediction = LASSO.predict, 
-                       inSamples, oos)
-df=eval.transformToDF(simRes)
-
-meanQtSSE$lasso=eval.meanQtSSE(v,df)
-QtOfMeansSSE$lasso=eval.QtMeanSSE(v,df)
 
 
 # calibrate relaxed lasso with fixed relaxation parameter
@@ -145,12 +152,3 @@ QtOfMeansSSE$elasticNetCV=eval.QtMeanSSE(v,df)
 
 
 
-# save results
-meanQtSSE=as.data.frame(meanQtSSE)
-QtOfMeansSSE=as.data.frame(QtOfMeansSSE)
-
-saveRDS(meanQtSSE,"meanQtSSE.rds")
-saveRDS(QtOfMeansSSE,"QtOfMeansSSE.rds")
-
-write.csv2(meanQtSSE,"meanQtSSE.csv")
-#write.csv(QtOfMeansSSE,"QtOfMeansSSE.csv")
